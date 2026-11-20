@@ -6,9 +6,9 @@ use crate::{
     STABLE_MEMORY_VERSION, SYSTEM_VERSION,
 };
 use candid::Principal;
-use ic_cdk::call;
 use ic_stable_structures::{storable::Bound, Storable};
 use orbit_essentials::backup_snapshots::{default_max_backup_snapshots, BackupSnapshots};
+use orbit_essentials::cdk::call;
 use orbit_essentials::storable;
 use orbit_essentials::types::{Timestamp, UUID};
 use std::borrow::Cow;

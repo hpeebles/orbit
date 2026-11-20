@@ -1,8 +1,8 @@
 use crate::model::InstallMode;
 use async_trait::async_trait;
 use candid::Principal;
-use ic_cdk::api::management_canister::main::{self as mgmt, CanisterIdRecord};
 use lazy_static::lazy_static;
+use orbit_essentials::cdk::api::management_canister::main::{self as mgmt, CanisterIdRecord};
 use orbit_essentials::install_chunked_code::install_chunked_code;
 use orbit_essentials::types::WasmModuleExtraChunks;
 use std::{collections::BTreeSet, sync::Arc};
@@ -61,7 +61,7 @@ impl InstallCanister for StationDisasterRecoveryInstall {
                 let mut controllers = BTreeSet::new();
                 controllers.extend(info.controllers.iter().cloned());
                 controllers.insert(canister_id);
-                controllers.insert(ic_cdk::id());
+                controllers.insert(orbit_essentials::cdk::id());
 
                 mgmt::update_settings(mgmt::UpdateSettingsArgument {
                     canister_id,

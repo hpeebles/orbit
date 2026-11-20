@@ -10,10 +10,10 @@ use crate::{
 };
 use candid::{Encode, Principal};
 use control_panel_api::DeployStationInput;
-use ic_cdk::api::id as self_canister_id;
-use ic_cdk::api::management_canister::main::{self as mgmt, CanisterIdRecord};
 use lazy_static::lazy_static;
 use orbit_essentials::api::ServiceResult;
+use orbit_essentials::cdk::api::id as self_canister_id;
+use orbit_essentials::cdk::api::management_canister::main::{self as mgmt, CanisterIdRecord};
 use orbit_essentials::cmc::create_canister;
 use orbit_essentials::install_chunked_code::install_chunked_code;
 use orbit_essentials::utils::check_balance_before_transfer;

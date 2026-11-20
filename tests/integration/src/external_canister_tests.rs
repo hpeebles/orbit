@@ -8,9 +8,9 @@ use crate::utils::{
 };
 use crate::TestEnv;
 use candid::{Encode, Principal};
-use ic_cdk::api::management_canister::main::CanisterStatusResponse;
 use ic_management_canister_types::{CanisterIdRecord, CanisterStatusType};
 use orbit_essentials::api::ApiResult;
+use orbit_essentials::cdk::api::management_canister::main::CanisterStatusResponse;
 use orbit_essentials::cmc::{SubnetFilter, SubnetSelection};
 use orbit_essentials::utils::timestamp_to_rfc3339;
 use pocket_ic::update_candid_as;
@@ -1771,7 +1771,13 @@ fn snapshot_unstoppable_external_canister_test() {
             .unwrap();
     match failed_request_status {
         RequestStatusDTO::Failed { reason } => {
-            assert!(reason.unwrap().contains("Stop canister request timed out"))
+            // the bounded-wait stop call's deadline expires as the stop itself times out
+            let reason = reason.unwrap();
+            assert!(
+                reason.contains("Stop canister request timed out")
+                    || reason.contains("Call deadline has expired"),
+                "{reason}"
+            )
         }
         _ => panic!("Unexpected request status: {failed_request_status:?}"),
     };

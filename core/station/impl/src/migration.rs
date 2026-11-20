@@ -26,13 +26,13 @@ impl MigrationHandler {
         }
 
         if stored_version > STABLE_MEMORY_VERSION {
-            trap(&format!(
+            trap(format!(
                 "Cannot downgrade the station from memory layout version {stored_version} to {STABLE_MEMORY_VERSION}"
             ));
         }
 
         if stored_version != STABLE_MEMORY_VERSION - 1 {
-            trap(&format!(
+            trap(format!(
                 "Cannot skip upgrades between station memory layout version {stored_version} to {STABLE_MEMORY_VERSION}"
             ));
         }

@@ -10,7 +10,7 @@ use crate::{
     },
     repositories::{request_policy::REQUEST_POLICY_REPOSITORY, ASSET_REPOSITORY},
 };
-use ic_cdk::print;
+use orbit_essentials::cdk::print;
 use orbit_essentials::{repository::Repository, utils::timestamp_to_rfc3339};
 use station_api::{AccountAssetDTO, AccountBalanceDTO, AccountDTO};
 use uuid::Uuid;

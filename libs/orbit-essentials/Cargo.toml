@@ -20,6 +20,7 @@ convert_case = { workspace = true }
 getrandom = { workspace = true, features = ['custom'] }
 hex = { workspace = true }
 ic-cdk = { workspace = true }
+ic0 = { workspace = true }
 ic-certification = { workspace = true }
 ic-http-certification = { workspace = true }
 ic-representation-independent-hash = { workspace = true }

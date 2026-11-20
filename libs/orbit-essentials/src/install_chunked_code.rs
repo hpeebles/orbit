@@ -1,10 +1,10 @@
-use crate::types::WasmModuleExtraChunks;
-use candid::{CandidType, Deserialize, Principal};
-use ic_cdk::api::management_canister::main::{
+use crate::call::call;
+use crate::management_canister::{
     self as mgmt, CanisterInstallMode, ChunkHash, ClearChunkStoreArgument,
     InstallChunkedCodeArgument, InstallCodeArgument, UploadChunkArgument,
 };
-use ic_cdk::call;
+use crate::types::WasmModuleExtraChunks;
+use candid::{CandidType, Deserialize, Principal};
 use sha2::{Digest, Sha256};
 
 // ICP limits

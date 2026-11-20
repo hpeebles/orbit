@@ -8,7 +8,8 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future;
-use orbit_essentials::cdk::{call, id};
+use orbit_essentials::call::call_unbounded;
+use orbit_essentials::cdk::id;
 
 #[derive(Debug, Default)]
 pub struct Job {
@@ -107,7 +108,8 @@ impl Job {
                 .await
                 .map_err(|e| (request, e))
         } else {
-            call::<_, (Result<(), RequestExecuteError>,)>(
+            // Unbounded: a timeout would fail the request while its execution carries on.
+            call_unbounded::<_, (Result<(), RequestExecuteError>,)>(
                 id(),
                 "try_execute_request",
                 (request.id,),

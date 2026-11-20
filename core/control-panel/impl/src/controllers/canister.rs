@@ -5,10 +5,10 @@ use crate::core::metrics::recompute_all_metrics;
 use crate::services::{CANISTER_SERVICE, USER_SERVICE};
 use control_panel_api::UploadCanisterModulesInput;
 use ic_cdk_macros::{init, post_upgrade};
-use ic_cdk_timers::{set_timer, set_timer_interval};
 use orbit_essentials::api::ApiResult;
 use orbit_essentials::cdk::update;
 use orbit_essentials::http::certified_data_for_skip_certification;
+use orbit_essentials::timers::{set_timer, set_timer_interval};
 use std::time::Duration;
 
 pub const MINUTE: u64 = 60;
@@ -31,8 +31,8 @@ fn init_timers_fn() {
     async fn initialize_rng_timer() {
         use orbit_essentials::utils::initialize_rng;
         if let Err(e) = initialize_rng().await {
-            ic_cdk::print(format!("initializing rng failed: {e}"));
-            ic_cdk_timers::set_timer(std::time::Duration::from_secs(60), move || {
+            orbit_essentials::cdk::print(format!("initializing rng failed: {e}"));
+            orbit_essentials::timers::set_timer(std::time::Duration::from_secs(60), move || {
                 spawn(initialize_rng_timer())
             });
         }

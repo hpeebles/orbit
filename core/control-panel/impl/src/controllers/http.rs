@@ -12,11 +12,22 @@ use orbit_essentials::metrics::with_metrics_registry;
 use std::sync::Arc;
 
 // Canister entrypoints for the controller.
-#[query(name = "http_request", decoding_quota = 10000)]
+// `hidden` because with `decode_with` the macro would declare the argument a `blob`.
+#[query(
+    name = "http_request",
+    hidden,
+    decode_with = "orbit_essentials::http::decode_http_request"
+)]
 async fn http_request(request: HttpRequest) -> HttpResponse {
     let mut resp = CONTROLLER.router(request).await;
     add_skip_certification_headers(&mut resp);
     resp
+}
+
+#[candid::candid_method(query, rename = "http_request")]
+#[allow(dead_code)]
+fn http_request_candid(_request: HttpRequest) -> HttpResponse {
+    unreachable!("declares the Candid signature of `http_request`")
 }
 
 // Controller initialization and implementation.

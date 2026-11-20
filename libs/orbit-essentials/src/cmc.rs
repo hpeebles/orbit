@@ -1,7 +1,7 @@
+use crate::call::call_with_payment128;
+use crate::management_canister::CanisterSettings;
 use crate::utils::check_balance_before_transfer;
 use candid::{CandidType, Deserialize, Principal};
-use ic_cdk::api::call::call_with_payment128;
-use ic_cdk::api::management_canister::main::CanisterSettings;
 use serde::Serialize;
 
 /// The CMC canister is used to deploy a canister on a subnet of choice.

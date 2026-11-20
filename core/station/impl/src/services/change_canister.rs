@@ -3,15 +3,15 @@ use crate::{
     models::{CanisterInstallMode, PruneExternalCanisterResource, WasmModuleExtraChunks},
 };
 use candid::Principal;
-use ic_cdk::api::management_canister::{
+use lazy_static::lazy_static;
+use orbit_essentials::api::ServiceResult;
+use orbit_essentials::cdk::api::management_canister::{
     main as mgmt,
     main::{
         CanisterIdRecord, ClearChunkStoreArgument, DeleteCanisterSnapshotArgs,
         LoadCanisterSnapshotArgs, TakeCanisterSnapshotArgs,
     },
 };
-use lazy_static::lazy_static;
-use orbit_essentials::api::ServiceResult;
 use orbit_essentials::install_chunked_code::install_chunked_code;
 use std::sync::Arc;
 

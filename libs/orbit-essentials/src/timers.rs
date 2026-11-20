@@ -1,5 +1,24 @@
 #[cfg(not(test))]
-pub use ic_cdk_timers::*;
+pub use self::closures::*;
+
+/// `ic-cdk-timers` 1.0 takes futures where 0.11 took the closures these still take.
+#[cfg(not(test))]
+mod closures {
+    pub use ic_cdk_timers::*;
+    use std::time::Duration;
+
+    pub fn set_timer(delay: Duration, func: impl FnOnce() + 'static) -> TimerId {
+        ic_cdk_timers::set_timer(delay, async move { func() })
+    }
+
+    /// `func` must not clear its own timer: ic-cdk-timers 1.0 panics if it does.
+    pub fn set_timer_interval(interval: Duration, mut func: impl FnMut() + 'static) -> TimerId {
+        ic_cdk_timers::set_timer_interval(interval, move || {
+            func();
+            std::future::ready(())
+        })
+    }
+}
 
 #[cfg(test)]
 pub use mocks::*;

@@ -488,7 +488,7 @@ impl From<station_api::SystemRestoreOperationInput> for SystemRestoreOperationIn
         SystemRestoreOperationInput {
             target: input.target.into(),
             snapshot_id: hex::decode(&input.snapshot_id).unwrap_or_else(|err| {
-                ic_cdk::trap(&format!(
+                ic_cdk::trap(format!(
                     "Failed to decode snapshot id {} to hex: {}",
                     input.snapshot_id, err
                 ))
@@ -1445,7 +1445,7 @@ impl From<station_api::SnapshotExternalCanisterOperationInput>
             canister_id: input.canister_id,
             replace_snapshot: input.replace_snapshot.map(|snapshot_id| {
                 hex::decode(&snapshot_id).unwrap_or_else(|err| {
-                    ic_cdk::trap(&format!(
+                    ic_cdk::trap(format!(
                         "Failed to decode snapshot id {snapshot_id} to hex: {err}"
                     ))
                 })
@@ -1486,7 +1486,7 @@ impl From<station_api::RestoreExternalCanisterOperationInput>
         RestoreExternalCanisterOperationInput {
             canister_id: input.canister_id,
             snapshot_id: hex::decode(&input.snapshot_id).unwrap_or_else(|err| {
-                ic_cdk::trap(&format!(
+                ic_cdk::trap(format!(
                     "Failed to decode snapshot id {} to hex: {}",
                     input.snapshot_id, err
                 ))
@@ -1523,7 +1523,7 @@ impl From<PruneExternalCanisterResourceDTO> for PruneExternalCanisterResource {
             PruneExternalCanisterResourceDTO::Snapshot(snapshot_id) => {
                 PruneExternalCanisterResource::Snapshot(hex::decode(&snapshot_id).unwrap_or_else(
                     |err| {
-                        ic_cdk::trap(&format!(
+                        ic_cdk::trap(format!(
                             "Failed to convert snapshot id {snapshot_id} to hex: {err}"
                         ))
                     },

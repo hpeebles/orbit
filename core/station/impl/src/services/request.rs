@@ -20,8 +20,8 @@ use crate::{
     },
     services::{NotificationService, UserService, NOTIFICATION_SERVICE, USER_SERVICE},
 };
-use ic_cdk::print;
 use lazy_static::lazy_static;
+use orbit_essentials::cdk::print;
 use orbit_essentials::utils::rfc3339_to_timestamp;
 use orbit_essentials::{api::ServiceResult, model::ModelValidator};
 use orbit_essentials::{repository::Repository, types::UUID};

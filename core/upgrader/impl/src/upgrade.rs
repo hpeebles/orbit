@@ -5,13 +5,13 @@ use crate::{
 };
 use anyhow::anyhow;
 use async_trait::async_trait;
-use ic_cdk::api::management_canister::main::{
-    self as mgmt, CanisterIdRecord, CanisterInfoRequest, CanisterInstallMode,
-    TakeCanisterSnapshotArgs,
-};
 use mockall::automock;
 use orbit_essentials::api::ApiResult;
 use orbit_essentials::cdk::api::canister_version;
+use orbit_essentials::cdk::api::management_canister::main::{
+    self as mgmt, CanisterIdRecord, CanisterInfoRequest, CanisterInstallMode,
+    TakeCanisterSnapshotArgs,
+};
 use orbit_essentials::cdk::api::management_canister::main::{
     load_canister_snapshot, LoadCanisterSnapshotArgs,
 };
@@ -155,7 +155,7 @@ impl<T: Upgrade> Upgrade for WithBackground<T> {
         let u = self.0.clone();
         let target_canister_id = get_target_canister();
 
-        ic_cdk::spawn(async move {
+        orbit_essentials::cdk::spawn(async move {
             let res = u.upgrade(ps).await;
             // Notify the target canister about a failed upgrade or restore unless the call is unauthorized
             // (we don't want to spam the target canister with such errors).
@@ -197,7 +197,7 @@ impl<T: Upgrade> Upgrade for WithAuthorization<T> {
     async fn upgrade(&self, ps: ChangeParams) -> Result<(), UpgradeError> {
         let id = get_target_canister();
 
-        if !ic_cdk::caller().eq(&id) {
+        if !orbit_essentials::cdk::caller().eq(&id) {
             return Err(UpgradeError::Unauthorized);
         }
 
@@ -219,7 +219,7 @@ impl<T: Upgrade> Upgrade for CheckController<T> {
         .await
         .map_err(|(code, err)| anyhow!("failed to get canister info: {code:?} {err}"))?;
 
-        if !resp.controllers.contains(&ic_cdk::id()) {
+        if !resp.controllers.contains(&orbit_essentials::cdk::id()) {
             return Err(UpgradeError::NotController);
         }
 

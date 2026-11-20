@@ -4,10 +4,10 @@ use crate::{
     models::resource::{ExternalCanisterId, ExternalCanisterResourceAction, Resource},
     services::{ExternalCanisterService, EXTERNAL_CANISTER_SERVICE},
 };
-use ic_cdk::api::management_canister::main::CanisterStatusResponse;
 use ic_cdk_macros::{query, update};
 use lazy_static::lazy_static;
 use orbit_essentials::api::ApiResult;
+use orbit_essentials::cdk::api::management_canister::main::CanisterStatusResponse;
 use orbit_essentials::with_middleware;
 use station_api::{
     CanisterSnapshotsInput, CanisterStatusInput, ExternalCanisterCallerPrivilegesDTO,
@@ -23,7 +23,7 @@ async fn canister_status(input: CanisterStatusInput) -> CanisterStatusResponse {
     CONTROLLER
         .canister_status(input)
         .await
-        .unwrap_or_else(|e| trap(&format!("{e:?}")))
+        .unwrap_or_else(|e| trap(format!("{e:?}")))
 }
 
 #[update(name = "canister_snapshots")]

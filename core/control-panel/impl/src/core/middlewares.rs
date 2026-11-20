@@ -24,7 +24,7 @@ where
 {
     match result {
         Some(result) => {
-            ic_cdk::api::print(
+            orbit_essentials::cdk::api::print(
                 serde_json::to_string(&LogMessage {
                     function: target_fn.to_string(),
                     message: format!("completed execution with result {result:?}"),
@@ -35,7 +35,7 @@ where
             );
         }
         None => {
-            ic_cdk::api::print(
+            orbit_essentials::cdk::api::print(
                 serde_json::to_string(&LogMessage {
                     function: target_fn.to_string(),
                     message: "started execution".to_string(),

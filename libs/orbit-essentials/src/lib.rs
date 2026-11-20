@@ -9,11 +9,13 @@
 
 pub mod api;
 pub mod backup_snapshots;
+pub mod call;
 pub mod cdk;
 pub mod cmc;
 pub mod deserialize;
 pub mod http;
 pub mod install_chunked_code;
+pub mod management_canister;
 pub mod metrics;
 pub mod model;
 pub mod repository;

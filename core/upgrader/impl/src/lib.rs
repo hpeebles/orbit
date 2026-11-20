@@ -4,7 +4,6 @@ use crate::upgrade::{
     WithStart, WithStop,
 };
 use candid::Principal;
-use ic_cdk::api::management_canister::main::CanisterInstallMode;
 use ic_cdk::{init, post_upgrade, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
@@ -12,6 +11,7 @@ use ic_stable_structures::{
 };
 use lazy_static::lazy_static;
 use orbit_essentials::backup_snapshots::BackupSnapshots;
+use orbit_essentials::cdk::api::management_canister::main::CanisterInstallMode;
 use orbit_essentials::storable;
 use std::{cell::RefCell, sync::Arc};
 use upgrade::{ChangeParams, RestoreParams, UpgradeError, UpgradeParams};
@@ -193,7 +193,7 @@ async fn trigger_restore(params: upgrader_api::RestoreParams) -> Result<(), Trig
 #[update]
 async fn set_max_backup_snapshots(max_backup_snapshots: u64) -> Result<(), String> {
     let id = get_target_canister();
-    if ic_cdk::caller() != id {
+    if orbit_essentials::cdk::caller() != id {
         return Err(format!(
             "Only the target canister {id} is authorized to call `set_max_backup_snapshots`."
         ));

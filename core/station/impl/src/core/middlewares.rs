@@ -39,7 +39,7 @@ pub fn authorize(ctx: &CallContext, resources: &[Resource]) {
         .collect::<Vec<bool>>();
 
     if allowed_resources.contains(&false) {
-        trap(&format!(
+        trap(format!(
             "Unauthorized access to resources: {}",
             unauthorized_resources.join(", ")
         ));

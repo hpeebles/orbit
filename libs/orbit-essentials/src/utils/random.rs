@@ -44,7 +44,7 @@ pub async fn random_bytes<const N: usize>() -> [u8; N] {
 ///
 /// This function is async because it may need to call into the management canister to get a seed with `raw_rand``.
 pub async fn initialize_rng() -> Result<(), String> {
-    ic_cdk::print("started to initialize rng");
+    ic_cdk::api::debug_print("started to initialize rng");
 
     let (created_seed,) = management_canister::main::raw_rand()
         .await
@@ -58,7 +58,7 @@ pub async fn initialize_rng() -> Result<(), String> {
 
     RAW_RAND_SUCCESSFUL.with(|b| *b.borrow_mut() = true);
 
-    ic_cdk::print("rng succesfully initialized");
+    ic_cdk::api::debug_print("rng succesfully initialized");
     Ok(())
 }
 

@@ -1,8 +1,9 @@
 use candid::{CandidType, Deserialize, Principal};
 use futures::future::join_all;
-use ic_cdk::api::call::call_raw;
-use ic_cdk::api::performance_counter;
-use ic_cdk::{id, query, update};
+use ic_cdk::api::{canister_self as id, performance_counter};
+use ic_cdk::call::Call;
+use ic_cdk::{query, update};
+use std::future::IntoFuture;
 
 thread_local! {
     static NUMBER: std::cell::RefCell<u64> = const { std::cell::RefCell::new(0) };
@@ -17,7 +18,11 @@ async fn call(canister_id: Principal, method_name: String, arg: Vec<u8>, mut tot
         total_calls -= current_batch;
         let mut futs = vec![];
         for _ in 0..current_batch {
-            futs.push(call_raw(canister_id, &method_name, arg.clone(), 0));
+            futs.push(
+                Call::bounded_wait(canister_id, &method_name)
+                    .take_raw_args(arg.clone())
+                    .into_future(),
+            );
         }
         let res = join_all(futs).await;
         for r in res {
@@ -49,7 +54,7 @@ async fn validate_number(input: StoreNumberInput) -> ValidationResponse {
 #[update]
 async fn validate_when_released() -> ValidationResponse {
     while !VALIDATION_RELEASED.with(|released| *released.borrow()) {
-        let _ = ic_cdk::call::<_, ()>(id(), "noop", ((),)).await;
+        let _ = Call::bounded_wait(id(), "noop").await;
     }
     ValidationResponse::Ok("Released".to_string())
 }
@@ -80,7 +85,7 @@ async fn noop() {}
 async fn unstoppable() {
     loop {
         if performance_counter(0) >= 19_000_000_000 {
-            let _ = ic_cdk::call::<_, ()>(id(), "noop", ((),)).await;
+            let _ = Call::bounded_wait(id(), "noop").await;
         }
     }
 }
@@ -88,7 +93,7 @@ async fn unstoppable() {
 #[update]
 async fn wait_for_release() {
     while !RELEASED.with(|r| *r.borrow()) {
-        let _ = ic_cdk::call::<_, ()>(id(), "noop", ((),)).await;
+        let _ = Call::bounded_wait(id(), "noop").await;
     }
 }
 

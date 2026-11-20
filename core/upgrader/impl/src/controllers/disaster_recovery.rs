@@ -140,7 +140,7 @@ impl DisasterRecoveryController {
     }
 
     fn is_committee_member(&self) -> ApiResult<upgrader_api::IsCommitteeMemberResponse> {
-        let caller = ic_cdk::caller();
+        let caller = orbit_essentials::cdk::caller();
 
         if caller == Principal::anonymous() {
             Err(UpgraderApiError::Unauthorized)?

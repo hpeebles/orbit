@@ -1,4 +1,4 @@
-use crate::api::{HeaderField, HttpResponse};
+use crate::api::{HeaderField, HttpRequest, HttpResponse};
 use crate::cdk::api::data_certificate;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
@@ -6,6 +6,15 @@ use ic_certification::{labeled, leaf, HashTree};
 use ic_http_certification::DefaultCelBuilder;
 use ic_representation_independent_hash::hash;
 use serde::Serialize;
+
+/// Decodes an `http_request` argument within a decoding quota, which ic-cdk 0.20's `query` macro
+/// can no longer set: pass it as the macro's `decode_with`.
+pub fn decode_http_request(arg: Vec<u8>) -> HttpRequest {
+    let mut config = candid::DecoderConfig::new();
+    config.set_decoding_quota(10_000).set_skipping_quota(10_000);
+    candid::utils::decode_one_with_config(&arg, &config)
+        .unwrap_or_else(|err| ic_cdk::trap(format!("failed to decode call arguments: {err:?}")))
+}
 
 // Certify that frontend asset certification is skipped for this canister.
 

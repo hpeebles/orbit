@@ -34,13 +34,13 @@ use crate::repositories::{
 };
 use crate::services::cycle_manager::{CycleManager, CYCLE_MANAGER};
 use candid::{Encode, Principal};
-use ic_cdk::api::call::call_raw;
-use ic_cdk::api::management_canister::main::{
+use lazy_static::lazy_static;
+use orbit_essentials::api::ServiceResult;
+use orbit_essentials::cdk::api::call::call_raw;
+use orbit_essentials::cdk::api::management_canister::main::{
     self as mgmt, delete_canister, deposit_cycles, stop_canister, update_settings,
     CanisterIdRecord, CanisterStatusResponse, Snapshot, UpdateSettingsArgument,
 };
-use lazy_static::lazy_static;
-use orbit_essentials::api::ServiceResult;
 use orbit_essentials::model::ModelKey;
 use orbit_essentials::model::ModelValidator;
 use orbit_essentials::pagination::{paginated_items, PaginatedItemsArgs};

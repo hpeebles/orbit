@@ -3,7 +3,7 @@ mod test {
 
     use std::fs;
 
-    use ic_cdk::api::stable::WASM_PAGE_SIZE_IN_BYTES;
+    use ic_cdk::stable::WASM_PAGE_SIZE_IN_BYTES;
     use ic_stable_structures::{memory_manager::MemoryId, Memory};
     use orbit_essentials::{model::ModelKey, repository::Repository};
 

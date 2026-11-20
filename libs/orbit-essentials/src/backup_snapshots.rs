@@ -1,5 +1,5 @@
+use crate::management_canister::{self as mgmt, DeleteCanisterSnapshotArgs};
 use candid::Principal;
-use ic_cdk::api::management_canister::main::{self as mgmt, DeleteCanisterSnapshotArgs};
 use orbit_essentials_macros::storable;
 use std::collections::VecDeque;
 

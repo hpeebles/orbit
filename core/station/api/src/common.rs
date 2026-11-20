@@ -1,5 +1,5 @@
 use candid::{CandidType, Deserialize};
-use ic_cdk::api::management_canister::main as mgmt;
+use orbit_essentials::cdk::api::management_canister::main as mgmt;
 use orbit_essentials::utils::timestamp_to_rfc3339;
 use std::collections::HashMap;
 

@@ -4,7 +4,7 @@ use crate::repositories::USER_REPOSITORY;
 use candid::Principal;
 
 #[cfg(not(test))]
-use ic_cdk::api::caller;
+use orbit_essentials::cdk::api::caller;
 
 #[cfg(test)]
 use std::sync::Mutex;

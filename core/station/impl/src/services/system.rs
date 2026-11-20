@@ -204,7 +204,7 @@ impl SystemService {
     ) -> ServiceResult<()> {
         let upgrader_canister_id = self.get_upgrader_canister_id();
 
-        ic_cdk::call::<_, ()>(
+        orbit_essentials::cdk::call::<_, ()>(
             upgrader_canister_id,
             "trigger_upgrade",
             (UpgradeParams {
@@ -265,7 +265,7 @@ impl SystemService {
     pub async fn restore_station(&self, snapshot_id: Vec<u8>) -> ServiceResult<()> {
         let upgrader_canister_id = self.get_upgrader_canister_id();
 
-        ic_cdk::call::<_, ()>(
+        orbit_essentials::cdk::call::<_, ()>(
             upgrader_canister_id,
             "trigger_restore",
             (RestoreParams { snapshot_id },),
@@ -305,7 +305,7 @@ impl SystemService {
         async fn initialize_rng_timer() {
             use orbit_essentials::utils::initialize_rng;
             if let Err(e) = initialize_rng().await {
-                ic_cdk::print(format!("initializing rng failed: {e}"));
+                orbit_essentials::cdk::print(format!("initializing rng failed: {e}"));
                 crate::core::ic_timers::set_timer(std::time::Duration::from_secs(60), move || {
                     use crate::core::ic_cdk::spawn;
                     spawn(initialize_rng_timer())
@@ -463,7 +463,7 @@ impl SystemService {
             if let Err(e) =
                 install_canister_post_process_work(init.clone(), system_info.clone()).await
             {
-                ic_cdk::print(format!("canister initialization failed: {e}"));
+                orbit_essentials::cdk::print(format!("canister initialization failed: {e}"));
                 crate::core::ic_timers::set_timer(
                     std::time::Duration::from_secs(3600),
                     move || {
@@ -488,7 +488,7 @@ impl SystemService {
                         // synchronously via a system API.
                         let station_cycles = canister_balance128();
                         if station_cycles < upgrader_initial_cycles {
-                            ic_cdk::trap(&format!("Station cycles balance {station_cycles} is insufficient for transferring {upgrader_initial_cycles} cycles when deploying the upgrader."));
+                            ic_cdk::trap(format!("Station cycles balance {station_cycles} is insufficient for transferring {upgrader_initial_cycles} cycles when deploying the upgrader."));
                         }
                     }
                 };
@@ -1198,8 +1198,8 @@ mod install_canister_handlers {
     use crate::services::cycle_manager::CYCLE_MANAGER;
     use crate::services::EXTERNAL_CANISTER_SERVICE;
     use candid::{Encode, Principal};
-    use ic_cdk::api::management_canister::main::{self as mgmt};
-    use ic_cdk::id;
+    use orbit_essentials::cdk::api::management_canister::main::{self as mgmt};
+    use orbit_essentials::cdk::id;
 
     pub async fn init_upgrader(
         input: station_api::SystemUpgraderInput,

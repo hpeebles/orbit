@@ -11,10 +11,10 @@ use canfund::operations::obtain::{
     MintCycles, ObtainCycles, ObtainCyclesError, WithdrawFromCyclesLedger,
 };
 use canfund::FundManager;
-use ic_cdk::api::management_canister::main::CanisterId;
-use ic_cdk::print;
 use ic_ledger_types::{MAINNET_CYCLES_MINTING_CANISTER_ID, MAINNET_LEDGER_CANISTER_ID};
 use lazy_static::lazy_static;
+use orbit_essentials::cdk::api::management_canister::main::CanisterId;
+use orbit_essentials::cdk::print;
 use orbit_essentials::repository::Repository;
 use std::cell::RefCell;
 use std::sync::Arc;

@@ -2,12 +2,80 @@
 pub use ic_cdk::*;
 
 #[cfg(not(test))]
+pub use crate::call::call;
+
+#[cfg(not(test))]
 pub mod ic_cdk_extended {
     /// Returns the current time in nanoseconds since the epoch.
     ///
     /// This function increments the time by 1ns for each call in the same round.
     pub fn next_time() -> u64 {
         crate::utils::next_time(ic_cdk::api::time())
+    }
+
+    // Names from ic-cdk 0.17 that ic-cdk 0.20 removed; the mocks below define them too.
+
+    pub fn caller() -> candid::Principal {
+        ic_cdk::api::msg_caller()
+    }
+
+    pub fn id() -> candid::Principal {
+        ic_cdk::api::canister_self()
+    }
+
+    pub fn print<S: AsRef<str>>(s: S) {
+        ic_cdk::api::debug_print(s)
+    }
+
+    /// Runs the future up to its first pending `await` before returning, as ic-cdk 0.17's `spawn`
+    /// did. Unlike 0.17, the task belongs to the current canister method: it traps if it is still
+    /// waiting once the method's calls are done, and a trap in any task of the method cancels all
+    /// of them.
+    pub fn spawn<F: 'static + std::future::Future<Output = ()>>(future: F) {
+        ic_cdk::futures::spawn_017_compat(future)
+    }
+}
+
+#[cfg(not(test))]
+pub mod api {
+    pub use ic_cdk::api::*;
+
+    pub fn caller() -> candid::Principal {
+        msg_caller()
+    }
+
+    pub fn id() -> candid::Principal {
+        canister_self()
+    }
+
+    pub fn print<S: AsRef<str>>(s: S) {
+        debug_print(s)
+    }
+
+    pub fn canister_balance() -> u64 {
+        u64::try_from(canister_cycle_balance()).unwrap_or(u64::MAX)
+    }
+
+    pub fn canister_balance128() -> u128 {
+        canister_cycle_balance()
+    }
+
+    pub fn set_certified_data(data: &[u8]) {
+        certified_data_set(data)
+    }
+
+    pub mod call {
+        pub use crate::call::{call_raw, call_with_payment128, CallResult, RejectionCode};
+
+        pub fn arg_data_raw_size() -> usize {
+            ic0::msg_arg_data_size()
+        }
+    }
+
+    pub mod management_canister {
+        pub mod main {
+            pub use crate::management_canister::*;
+        }
     }
 }
 
@@ -89,8 +157,8 @@ pub mod mocks {
             *principal == super::TEST_CONTROLLER_ID
         }
 
-        pub fn trap(message: &str) -> ! {
-            panic!("{}", message);
+        pub fn trap<T: AsRef<str>>(message: T) -> ! {
+            panic!("{}", message.as_ref());
         }
 
         pub fn print<S: AsRef<str>>(s: S) {
@@ -109,7 +177,7 @@ pub mod mocks {
 
         pub mod management_canister {
             pub mod main {
-                use ic_cdk::api::call::CallResult;
+                use crate::call::CallResult;
 
                 pub async fn raw_rand() -> CallResult<(Vec<u8>,)> {
                     Ok((vec![0; 32],))

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::main::CanisterInstallMode;
+use orbit_essentials::cdk::api::management_canister::main::CanisterInstallMode;
 use orbit_essentials::{
     storable,
     types::{Timestamp, WasmModuleExtraChunks, UUID},

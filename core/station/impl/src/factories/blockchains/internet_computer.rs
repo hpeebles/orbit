@@ -154,11 +154,12 @@ impl InternetComputer {
     ) -> BlockchainApiResult<u64> {
         let ledger_canister_id = Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-        let balance = ic_ledger_types::account_balance(
+        let (balance,) = orbit_essentials::cdk::call::<_, (ic_ledger_types::Tokens,)>(
             ledger_canister_id,
-            ic_ledger_types::AccountBalanceArgs {
+            "account_balance",
+            (ic_ledger_types::AccountBalanceArgs {
                 account: *account_identifier,
-            },
+            },),
         )
         .await
         .map_err(|e| BlockchainApiError::FetchBalanceFailed {
@@ -177,18 +178,20 @@ impl InternetComputer {
     ) -> BlockchainApiResult<BigUint> {
         let ledger_canister_id = Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-        let balance =
-            ic_cdk::call::<(icrc_ledger_types::icrc1::account::Account,), (candid::Nat,)>(
-                ledger_canister_id,
-                "icrc1_balance_of",
-                // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
-                (*account,),
-            )
-            .await
-            .map_err(|err| BlockchainApiError::BlockchainNetworkError {
-                info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
-            })?
-            .0;
+        let balance = orbit_essentials::cdk::call::<
+            (icrc_ledger_types::icrc1::account::Account,),
+            (candid::Nat,),
+        >(
+            ledger_canister_id,
+            "icrc1_balance_of",
+            // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
+            (*account,),
+        )
+        .await
+        .map_err(|err| BlockchainApiError::BlockchainNetworkError {
+            info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
+        })?
+        .0;
 
         Ok(balance.0)
     }
@@ -231,57 +234,65 @@ impl InternetComputer {
 
         let ledger_canister_id = Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-        let block_height = ic_ledger_types::transfer(
-            ledger_canister_id,
-            ic_ledger_types::TransferArgs {
-                amount: ic_ledger_types::Tokens::from_e8s(amount),
-                fee: ic_ledger_types::Tokens::from_e8s(transaction_fee),
-                created_at_time: Some(ic_ledger_types::Timestamp {
-                    timestamp_nanos: current_time,
-                }),
-                from_subaccount: Some(ic_ledger_types::Subaccount(
-                    InternetComputer::subaccount_from_seed(&station_account.seed),
-                )),
-                memo: ic_ledger_types::Memo(memo),
-                to: to_address,
-            },
-        )
-        .await
-        .map_err(|err| BlockchainApiError::BlockchainNetworkError {
-            info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
-        })?
-        .map_err(|err| BlockchainApiError::TransactionSubmitFailed {
-            info: match err {
-                ic_ledger_types::TransferError::BadFee { expected_fee } => {
-                    format!("Bad fee, expected: {expected_fee}")
-                }
-                ic_ledger_types::TransferError::InsufficientFunds { balance } => {
-                    format!("Insufficient balance, balance: {balance}")
-                }
-                ic_ledger_types::TransferError::TxTooOld {
-                    allowed_window_nanos,
-                } => {
-                    format!("Tx too old, allowed_window_nanos: {allowed_window_nanos}")
-                }
-                ic_ledger_types::TransferError::TxCreatedInFuture => {
-                    "Tx created in future".to_string()
-                }
-                ic_ledger_types::TransferError::TxDuplicate { duplicate_of } => {
-                    format!("Tx duplicate, duplicate_of: {duplicate_of}")
-                }
-            },
-        })?;
+        // Unbounded: with a bounded wait, a transfer whose reply was lost would be recorded as failed.
+        let block_height =
+            orbit_essentials::call::call_unbounded::<_, (ic_ledger_types::TransferResult,)>(
+                ledger_canister_id,
+                "transfer",
+                (ic_ledger_types::TransferArgs {
+                    amount: ic_ledger_types::Tokens::from_e8s(amount),
+                    fee: ic_ledger_types::Tokens::from_e8s(transaction_fee),
+                    created_at_time: Some(ic_ledger_types::Timestamp {
+                        timestamp_nanos: current_time,
+                    }),
+                    from_subaccount: Some(ic_ledger_types::Subaccount(
+                        InternetComputer::subaccount_from_seed(&station_account.seed),
+                    )),
+                    memo: ic_ledger_types::Memo(memo),
+                    to: to_address,
+                },),
+            )
+            .await
+            .map_err(|err| BlockchainApiError::BlockchainNetworkError {
+                info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
+            })?
+            .0
+            .map_err(|err| BlockchainApiError::TransactionSubmitFailed {
+                info: match err {
+                    ic_ledger_types::TransferError::BadFee { expected_fee } => {
+                        format!("Bad fee, expected: {expected_fee}")
+                    }
+                    ic_ledger_types::TransferError::InsufficientFunds { balance } => {
+                        format!("Insufficient balance, balance: {balance}")
+                    }
+                    ic_ledger_types::TransferError::TxTooOld {
+                        allowed_window_nanos,
+                    } => {
+                        format!("Tx too old, allowed_window_nanos: {allowed_window_nanos}")
+                    }
+                    ic_ledger_types::TransferError::TxCreatedInFuture => {
+                        "Tx created in future".to_string()
+                    }
+                    ic_ledger_types::TransferError::TxDuplicate { duplicate_of } => {
+                        format!("Tx duplicate, duplicate_of: {duplicate_of}")
+                    }
+                },
+            })?;
 
-        let transaction_hash = match ic_ledger_types::query_blocks(
+        let transaction_hash = match orbit_essentials::cdk::call::<
+            _,
+            (ic_ledger_types::QueryBlocksResponse,),
+        >(
             ledger_canister_id,
-            ic_ledger_types::GetBlocksArgs {
+            "query_blocks",
+            (ic_ledger_types::GetBlocksArgs {
                 length: 1,
                 start: block_height,
-            },
+            },),
         )
         .await
         {
-            Ok(ic_ledger_types::QueryBlocksResponse { blocks, .. }) => match blocks.first() {
+            Ok((ic_ledger_types::QueryBlocksResponse { blocks, .. },)) => match blocks.first() {
                 Some(block) => match Self::hash_transaction(&block.transaction) {
                     Ok(transaction_hash) => Some(transaction_hash),
                     Err(_) => {
@@ -345,7 +356,8 @@ impl InternetComputer {
 
         let ledger_canister_id = Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-        let block_height = ic_cdk::call::<
+        // Unbounded: with a bounded wait, a transfer whose reply was lost would be recorded as failed.
+        let block_height = orbit_essentials::call::call_unbounded::<
             (icrc_ledger_types::icrc1::transfer::TransferArg,),
             (
                 Result<
@@ -527,17 +539,19 @@ impl BlockchainApi for InternetComputer {
                 let ledger_canister_id =
                     Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-                let fee =
-                    ic_cdk::call::<(ICPLedgerTransferFeeInput,), (ICPLedgerTransferFeeResponse,)>(
-                        ledger_canister_id,
-                        "transfer_fee",
-                        (ICPLedgerTransferFeeInput {},),
-                    )
-                    .await
-                    .map_err(|err| BlockchainApiError::BlockchainNetworkError {
-                        info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
-                    })?
-                    .0;
+                let fee = orbit_essentials::cdk::call::<
+                    (ICPLedgerTransferFeeInput,),
+                    (ICPLedgerTransferFeeResponse,),
+                >(
+                    ledger_canister_id,
+                    "transfer_fee",
+                    (ICPLedgerTransferFeeInput {},),
+                )
+                .await
+                .map_err(|err| BlockchainApiError::BlockchainNetworkError {
+                    info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
+                })?
+                .0;
 
                 Ok(BlockchainTransactionFee {
                     fee: fee.transfer_fee.e8s.into(),
@@ -548,12 +562,16 @@ impl BlockchainApi for InternetComputer {
                 let ledger_canister_id =
                     Self::get_ledger_canister_id_from_metadata(&asset.metadata)?;
 
-                let fee = ic_cdk::call::<(), (candid::Nat,)>(ledger_canister_id, "icrc1_fee", ())
-                    .await
-                    .map_err(|err| BlockchainApiError::BlockchainNetworkError {
-                        info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
-                    })?
-                    .0;
+                let fee = orbit_essentials::cdk::call::<(), (candid::Nat,)>(
+                    ledger_canister_id,
+                    "icrc1_fee",
+                    (),
+                )
+                .await
+                .map_err(|err| BlockchainApiError::BlockchainNetworkError {
+                    info: format!("rejection_code: {:?}, err: {}", err.0, err.1),
+                })?
+                .0;
 
                 Ok(BlockchainTransactionFee {
                     fee: fee.0,

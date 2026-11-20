@@ -17,7 +17,7 @@ use crate::{
 };
 use candid::Principal;
 use canfund::manager::options::{CyclesThreshold, EstimatedRuntime};
-use ic_cdk::api::management_canister::main::{self as mgmt};
+use orbit_essentials::cdk::api::management_canister::main::{self as mgmt};
 use orbit_essentials::{repository::SortDirection, utils::timestamp_to_rfc3339};
 use station_api::ExternalCanisterDTO;
 use uuid::Uuid;

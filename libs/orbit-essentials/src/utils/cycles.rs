@@ -1,6 +1,5 @@
-use ic_cdk::api::canister_balance;
-use ic_cdk::api::management_canister::main::{canister_status, CanisterIdRecord};
-use ic_cdk::id;
+use crate::cdk::api::{canister_balance, id};
+use crate::management_canister::{canister_status, CanisterIdRecord};
 
 pub async fn check_balance_before_transfer(transfer_amount: u128) -> Result<(), String> {
     let self_id = id();

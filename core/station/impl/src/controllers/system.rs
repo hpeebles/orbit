@@ -116,7 +116,7 @@ impl SystemController {
             .init_canister(input)
             .await
             .unwrap_or_else(|err| {
-                trap(&format!("Error: initializing canister failed {err}"));
+                trap(format!("Error: initializing canister failed {err}"));
             });
     }
 
@@ -125,7 +125,7 @@ impl SystemController {
             .upgrade_canister(input)
             .await
             .unwrap_or_else(|err| {
-                trap(&format!("Error: upgrading canister failed {err}"));
+                trap(format!("Error: upgrading canister failed {err}"));
             });
     }
 
