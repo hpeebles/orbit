@@ -55,13 +55,13 @@ impl DfxOrbit {
 impl AssetAgent<'_> {
     pub(super) async fn upload_assets(&self, sources: &[&Path]) -> anyhow::Result<(Nat, ByteBuf)> {
         Ok(
-            ic_asset::prepare_sync_for_proposal(&self.canister_agent, sources, &self.logger)
+            ic_asset::prepare_sync_for_proposal(&self.canister_agent, sources, &self.logger, None)
                 .await?,
         )
     }
 
     pub(super) async fn compute_evidence(&self, sources: &[&Path]) -> anyhow::Result<String> {
-        Ok(ic_asset::compute_evidence(&self.canister_agent, sources, &self.logger).await?)
+        Ok(ic_asset::compute_evidence(&self.canister_agent, sources, &self.logger, None).await?)
     }
 
     pub(super) async fn validate_commit_proposed_batch(

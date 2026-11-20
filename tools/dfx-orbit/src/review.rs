@@ -139,7 +139,7 @@ impl ReviewArgs {
                             RequestApprovalStatusDTO::Approved => "approve",
                             RequestApprovalStatusDTO::Rejected => "reject",
                         };
-                        dfx_core::cli::ask_for_consent(&format!(
+                        crate::util::ask_for_consent(&format!(
                             "Would you like to {action} this request?"
                         ))?;
                         dfx_orbit.station.submit(submit).await?;

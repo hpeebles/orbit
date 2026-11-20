@@ -16,9 +16,19 @@ use std::{
     future::Future,
     hash::{DefaultHasher, Hash, Hasher},
     path::Path,
+    sync::LazyLock,
 };
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 use tokio::runtime::Runtime;
+
+/// The dfx config root, with the test identity. dfx-core reads `DFX_CONFIG_ROOT` only once per
+/// process, so every test shares this one.
+static DFX_CONFIG_ROOT: LazyLock<TempDir> = LazyLock::new(|| {
+    let dir = tempdir().unwrap();
+    std::env::set_var(DFX_ROOT, dir.path());
+    setup_identity(dir.path());
+    dir
+});
 
 //TODO: Generate these on the fly during tests
 pub(super) const TEST_PRINCIPAL: &str =
@@ -56,8 +66,8 @@ pub(super) fn dfx_orbit_test<F>(
 where
     F: Future,
 {
-    // NOTE: While DFX_CONFIG_ROOT can only be set with the help of an env variable
-    // this section of the test can not run in parallel.
+    // NOTE: dfx-core finds `dfx.json` and `canister_ids.json` from the current directory, which
+    // is process-wide, so this section of the test can not run in parallel.
     // Therefore we run this part of the test in a critical section, while the setup test
     // can run in parllel. Hopefully we will be able to fix this in the future.
     let _crit = AGENT_MUTEX.lock().unwrap();
@@ -65,7 +75,7 @@ where
     // Create a temporary directory and change to it
     let tmp_dir = tempdir().unwrap();
     std::env::set_current_dir(tmp_dir.path()).unwrap();
-    std::env::set_var(DFX_ROOT, tmp_dir.path());
+    LazyLock::force(&DFX_CONFIG_ROOT);
 
     // Pick a random port for the test.
     // If multiple dfx-orbit tests are run in parallel, they would get mixed up, if they ended
@@ -92,7 +102,6 @@ where
 
     setup_test_dfx_json(tmp_dir.path(), &config);
     setup_test_canister_ids_json(tmp_dir.path(), &config);
-    setup_identity(tmp_dir.path());
 
     // Start the live environment
     env.make_live(Some(port));

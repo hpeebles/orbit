@@ -237,9 +237,7 @@ impl VerifyArgs {
         match verified {
             Ok(()) => {
                 if self.and_approve {
-                    dfx_core::cli::ask_for_consent(
-                        "Verification successful, approve the request?",
-                    )?;
+                    crate::util::ask_for_consent("Verification successful, approve the request?")?;
                     dfx_orbit
                         .station
                         .approve(self.request_id.clone(), None)
@@ -250,7 +248,7 @@ impl VerifyArgs {
             }
             Err(err) => {
                 if self.or_reject {
-                    dfx_core::cli::ask_for_consent(&format!(
+                    crate::util::ask_for_consent(&format!(
                         "Verification failed: {err}. Reject the request?"
                     ))?;
                     dfx_orbit

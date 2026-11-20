@@ -95,6 +95,7 @@ impl RequestCanisterInstallArgs {
                 &asset_agent,
                 HashMap::from([(extra_chunks_key.clone(), path)]),
                 &dfx_orbit.logger,
+                None,
             )
             .await?;
 

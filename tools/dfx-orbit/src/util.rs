@@ -1,7 +1,25 @@
 use crate::DfxOrbit;
 use anyhow::{bail, Context};
 use dfx_core::config::model::dfinity::CanisterTypeProperties;
+use dfx_core::error::cli::UserConsent;
+use std::io::stdin;
 use std::path::{Path, PathBuf};
+
+/// Asks on stderr for a yes/no answer; anything but `y` or `yes` declines.
+pub(crate) fn ask_for_consent(message: &str) -> Result<(), UserConsent> {
+    eprintln!("WARNING!");
+    eprintln!("{message}");
+    eprintln!("Do you want to proceed? yes/No");
+    let mut input_string = String::new();
+    stdin()
+        .read_line(&mut input_string)
+        .map_err(UserConsent::ReadError)?;
+    let input_string = input_string.trim_end().to_lowercase();
+    if input_string != "yes" && input_string != "y" {
+        return Err(UserConsent::Declined);
+    }
+    Ok(())
+}
 
 impl DfxOrbit {
     pub(super) fn as_path_bufs(

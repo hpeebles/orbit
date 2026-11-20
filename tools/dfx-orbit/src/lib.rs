@@ -93,7 +93,6 @@ impl DfxOrbit {
         let canister_id = canister_id.to_string();
         let canister_name = canister_id_store
             .get_name(&canister_id)
-            .cloned()
             .ok_or(anyhow!("Failed to find canister name"))?;
 
         Ok(canister_name)
